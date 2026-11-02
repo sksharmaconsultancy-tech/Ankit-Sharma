@@ -55,6 +55,23 @@ class CompanyActivity : Activity() {
         root.addView(periodRow, matchWrap())
         updatePeriodButtons()
 
+        root.addView(label("Entry karein", 16f, C.TEXT, bold = true).apply { setPadding(0, dp(16), 0, dp(4)) })
+        addReport(root, "➕  Sales Invoice (items + GST)") {
+            startActivity(InvoiceFormActivity.newIntent(this, company, "Sales"))
+        }
+        addReport(root, "➕  Purchase Invoice") {
+            startActivity(InvoiceFormActivity.newIntent(this, company, "Purchase"))
+        }
+        addReport(root, "➕  Payment / Receipt / Contra / Journal") {
+            startActivity(VoucherFormActivity.newIntent(this, company, "Payment"))
+        }
+        addReport(root, "➕  Naya Ledger (party / account)") {
+            startActivity(LedgerFormActivity.newIntent(this, company))
+        }
+        addReport(root, "⚙️  Invoice print settings (address, GSTIN, bank)") {
+            startActivity(InvoiceSettingsActivity.newIntent(this, company))
+        }
+
         root.addView(label("Reports", 16f, C.TEXT, bold = true).apply { setPadding(0, dp(16), 0, dp(4)) })
 
         addReport(root, "📒  Sabhi Ledgers (balances)") {
@@ -97,6 +114,7 @@ class CompanyActivity : Activity() {
         root.addView(
             label(
                 "Tip: Kisi bhi ledger par tap karke uski entries (ledger statement) dekhein. " +
+                    "Day Book me kisi voucher par tap karke use Edit karein ya PDF bana kar WhatsApp / Email karein. " +
                     "Har list ko ⋮ menu se CSV (Excel) me export kar sakte hain.",
                 13f, C.MUTED,
             ).apply { setPadding(0, dp(16), 0, 0) }

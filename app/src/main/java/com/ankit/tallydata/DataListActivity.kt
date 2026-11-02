@@ -398,8 +398,33 @@ class DataListActivity : Activity() {
         AlertDialog.Builder(this)
             .setTitle(v.displayName.ifBlank { v.type })
             .setMessage(msg)
-            .setPositiveButton("OK", null)
+            .setPositiveButton("📤 PDF / WhatsApp / Email") { _, _ -> Sharing.shareVoucher(this, company, v) }
+            .setNeutralButton("✏️ Edit") { _, _ -> editVoucher(v) }
+            .setNegativeButton("Band", null)
             .show()
+    }
+
+    private fun editVoucher(v: Voucher) {
+        if (v.guid.isBlank()) {
+            message("Edit possible nahi", "Is voucher ki Tally ID nahi mili. Ise Tally me hi edit karein.")
+            return
+        }
+        VoucherHolder.voucher = v
+        reloadOnResume = true
+        startActivity(
+            if (v.isInvoice) InvoiceFormActivity.newIntent(this, company, "Sales", edit = true)
+            else VoucherFormActivity.newIntent(this, company, v.type, edit = true)
+        )
+    }
+
+    private var reloadOnResume = false
+
+    override fun onResume() {
+        super.onResume()
+        if (reloadOnResume) {
+            reloadOnResume = false
+            load(force = false)
+        }
     }
 
     // ---------------------------------------------------------------------

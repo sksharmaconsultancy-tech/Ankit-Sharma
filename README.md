@@ -3,7 +3,7 @@
 Apne phone se **apne computer par chal rahe Tally (TallyPrime / Tally.ERP 9)** ka pura data live dekhein —
 ledgers, trial balance, debtors/creditors, cash & bank, stock items, day book aur har ledger ka statement.
 
-App sirf **read-only** hai: Tally me kuch bhi change nahi karta.
+Saath hi phone se **nayi entry**, **voucher edit**, **naya ledger** aur **invoice PDF ko WhatsApp / Email** bhi kar sakte hain.
 
 ## APK kahan se milega
 
@@ -44,6 +44,28 @@ Tally ke XML server me koi password nahi hota.
 | Stock Items | Closing qty, rate, value |
 | Day Book / Sales / Purchase / Payment / Receipt | Vouchers; tap karke ledger entries, items, narration |
 | Export | Har list ⋮ menu se CSV (Excel) me save |
+| ➕ Sales / Purchase Invoice | Party, items (qty × rate), sales ledger, CGST/SGST/IGST % se, freight/discount, round off → Tally me save |
+| ➕ Payment / Receipt / Contra / Journal | Dr/Cr lines, auto-balance, narration → Tally me save |
+| ✏️ Edit | Day Book me voucher par tap → Edit → Tally me wahi voucher update (alter) hota hai |
+| 📤 PDF / WhatsApp / Email | Voucher par tap → Tally ke GST *Tax Invoice* jaise layout me PDF → WhatsApp (party ke mobile par), Email (party ki email par) ya koi bhi app |
+| ➕ Naya Ledger | Naam, group, address, state, GSTIN, mobile, email |
+| ⚙️ Invoice print settings | PDF par chhapne wala company address, GSTIN, bank details, declaration |
+
+### Entry / Edit ke baare me zaroori baatein
+
+- Entry Tally ke XML import se jaati hai — bilkul waise jaise Tally me *Import > Vouchers* hota hai. Save se pehle
+  app confirm karta hai.
+- Ledger / stock item ke naam Tally me pehle se hone chahiye (list se chunein). Naya party ledger app se bana sakte hain.
+- GST amounts app aapke diye % se calculate karta hai (Tally ka auto GST calculation import par nahi chalta).
+- Item invoice godown **Main Location** me jaata hai. Batch / multiple godown / bill-wise ke complex cases Tally me hi karein.
+- Pehli baar koi bhi entry karke Tally me khol kar check kar lein ki sab sahi gaya.
+
+### Invoice PDF ke baare me
+
+PDF Tally ke standard GST *Tax Invoice* print jaisa banta hai (company block, invoice no./date, buyer, items table,
+HSN, tax lines, total, amount in words, bank details, declaration, authorised signatory). Agar aapne Tally me
+custom TDL invoice format banwaya hai to wo hubahu (exact) nahi aayega — Tally ka print engine phone par nahi chal
+sakta. Company address / GSTIN / bank details *Invoice print settings* me ek baar bhar dein.
 
 Period (From/To) company screen par badal sakte hain.
 

@@ -178,3 +178,111 @@ const val HELP_TEXT = """Ye app aapke computer par chal rahe Tally se seedha (li
 
 Note: App sirf data padhta hai (read-only). Tally me kuch bhi change nahi karta.
 Jo company Tally me open (loaded) hai, wahi list me dikhegi."""
+
+/** Masters used by entry forms (cached per company until a Refresh / save). */
+object Masters {
+    private val cache = HashMap<String, Any>()
+
+    @Synchronized
+    fun clear() = cache.clear()
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <T : Any> cached(key: String, load: () -> T): T {
+        synchronized(this) { cache[key]?.let { return it as T } }
+        val v = load()
+        synchronized(this) { cache[key] = v }
+        return v
+    }
+
+    private fun k(kind: String, c: TallyClient, company: String) = "$kind|${c.host}:${c.port}|$company"
+
+    fun voucherTypes(c: TallyClient, company: String) =
+        cached(k("VT", c, company)) { c.voucherTypes(company) }
+
+    fun parties(c: TallyClient, company: String): Map<String, PartyInfo> =
+        cached(k("P", c, company)) { runCatching { c.partyDetails(company) }.getOrDefault(emptyMap()) }
+
+    fun companyInfo(c: TallyClient, company: String): CompanyInfo =
+        cached(k("C", c, company)) { runCatching { c.companyInfo(company) }.getOrDefault(CompanyInfo(company)) }
+
+    fun ledgerNames(c: TallyClient, company: String): List<Ledger> =
+        cached(k("L", c, company)) {
+            val today = LocalDate.now()
+            c.ledgers(company, today, today).sortedBy { it.name.lowercase() }
+        }
+
+    fun groupNames(c: TallyClient, company: String): List<String> =
+        cached(k("G", c, company)) {
+            val today = LocalDate.now()
+            c.groups(company, today, today).map { it.name }.sortedBy { it.lowercase() }
+        }
+
+    fun stockItems(c: TallyClient, company: String): List<StockItem> =
+        cached(k("S", c, company)) {
+            val today = LocalDate.now()
+            c.stockItems(company, today, today).sortedBy { it.name.lowercase() }
+        }
+}
+
+/** Called after anything is written to Tally so every screen re-reads fresh data. */
+fun invalidateAll() {
+    Repo.clear()
+    Masters.clear()
+}
+
+/** Company letter-head details for printed invoices; pre-filled from Tally, editable in the app. */
+class InvoiceSettings(
+    val companyName: String,
+    val address: String,
+    val gstin: String,
+    val state: String,
+    val phone: String,
+    val email: String,
+    val pan: String,
+    val bank: String,
+    val terms: String,
+) {
+    companion object {
+        private fun sp(ctx: Context) = ctx.getSharedPreferences("invoice", Context.MODE_PRIVATE)
+        private const val DEFAULT_TERMS =
+            "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct."
+
+        fun load(ctx: Context, company: String, fromTally: CompanyInfo?): InvoiceSettings {
+            val p = sp(ctx)
+            fun get(key: String, fallback: String) = p.getString("$company|$key", null) ?: fallback
+            val t = fromTally ?: CompanyInfo(company)
+            val addr = (t.address + listOfNotNull(t.pincode.ifBlank { null })).joinToString("\n")
+            return InvoiceSettings(
+                companyName = get("name", t.name.ifBlank { company }),
+                address = get("address", addr),
+                gstin = get("gstin", t.gstin),
+                state = get("state", t.state),
+                phone = get("phone", t.phone),
+                email = get("email", t.email),
+                pan = get("pan", t.pan),
+                bank = get("bank", ""),
+                terms = get("terms", DEFAULT_TERMS),
+            )
+        }
+
+        fun save(ctx: Context, company: String, s: InvoiceSettings) {
+            sp(ctx).edit()
+                .putString("$company|name", s.companyName)
+                .putString("$company|address", s.address)
+                .putString("$company|gstin", s.gstin)
+                .putString("$company|state", s.state)
+                .putString("$company|phone", s.phone)
+                .putString("$company|email", s.email)
+                .putString("$company|pan", s.pan)
+                .putString("$company|bank", s.bank)
+                .putString("$company|terms", s.terms)
+                .apply()
+        }
+    }
+}
+
+/** Hands a parsed voucher to the edit / share screens (vouchers are not Parcelable). */
+object VoucherHolder {
+    @Volatile
+    var voucher: Voucher? = null
+}
