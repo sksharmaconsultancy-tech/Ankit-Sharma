@@ -176,7 +176,7 @@ const val HELP_TEXT = """Ye app aapke computer par chal rahe Tally se seedha (li
    aur PC ka Tailscale IP (100.x.x.x) yahan daalein. Router par port 9000 ko
    internet par open na karein — Tally ke server me password nahi hota.
 
-Note: App sirf data padhta hai (read-only). Tally me kuch bhi change nahi karta.
+Note: Reports sirf data padhte hain. Entry / Edit / Naya Ledger save karne par hi Tally me badlav hota hai (har baar confirm karke).
 Jo company Tally me open (loaded) hai, wahi list me dikhegi."""
 
 /** Masters used by entry forms (cached per company until a Refresh / save). */
